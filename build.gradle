@@ -10,65 +10,13 @@ java {
     withSourcesJar()
 }
 
-repositories {
-    maven {
-        name = "dv8tion"
-        url = "https://m2.dv8tion.net/releases/"
-        content { includeGroup "net.dv8tion" }
-    }
-}
-
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraftVersion}"
     mappings "net.fabricmc:yarn:${project.yarnVersion}:v2"
     modImplementation "net.fabricmc:fabric-loader:${project.fabricLoaderVersion}"
 
-    modImplementation(fabricApi.module("fabric-api-base", project.fabricApiVersion))
-    modImplementation(fabricApi.module("fabric-command-api-v2", project.fabricApiVersion))
-    modImplementation(fabricApi.module("fabric-lifecycle-events-v1", project.fabricApiVersion))
-	
-	include implementation("com.squareup.okio:okio:3.2.0")
-	
-    // https://github.com/DV8FromTheWorld/JDA
-    include implementation("net.dv8tion:JDA:5.0.0-alpha.18") {
-        exclude module: 'opus-java'
-    }
-    // Include JDA's dependencies in the jar
-    include implementation("net.sf.trove4j:trove4j:3.0.3")
-    include implementation("org.apache.commons:commons-collections4:4.4")
-    include implementation("com.fasterxml.jackson.core:jackson-core:2.13.2")
-    include implementation("com.fasterxml.jackson.core:jackson-databind:2.13.2")
-    include implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.2")
-    include implementation("com.squareup.okhttp3:okhttp:4.9.3") {
-        transitive = false
-		}
-    include implementation("com.neovisionaries:nv-websocket-client:2.14")
-    modLocalRuntime("net.fabricmc:fabric-language-kotlin:1.7.3+kotlin.1.6.20") { // includes kotlin for squareup libs
-        exclude module: "fabric-loader"
-    }
-}
-
-//FUNNY workaround for Loom being a piece of shit and having include() not work on SPECIFICALLY OKIO, everything else works
-def okio = file("./okio-3.2.0-unmanualpatched.jar");
-def okioPatched = file("./src/main/resources/META-INF/jarr/okio-3.2.0-manualpatched.jar");
-if(!okio.exists()) {
-    def url = "https://repo1.maven.org/maven2/com/squareup/okio/okio/3.2.0/okio-3.2.0.jar";
-    println "Downloading ${url} to ${okio}... (might take a bit)"
-    okio.withOutputStream {it << new URL(url).openStream()}
-    if (okio.length() == 0) throw new IllegalStateException("${url} downloaded as 0 bytes");
-} 
-if(!okioPatched.exists()) {
-    println "Patching okio"
-    java.nio.file.Path okioPath = okio.toPath()
-    java.nio.file.Path okioPatchedPath = okioPatched.toPath()
-    java.nio.file.Files.copy(okioPath, okioPatchedPath, java.nio.file.StandardCopyOption.REPLACE_EXISTING)
-    
-    java.nio.file.FileSystems.newFileSystem(okioPatchedPath, (ClassLoader) null).withCloseable { okioPatchedFs ->
-        java.nio.file.Path fmjPath = okioPatchedFs.getPath("./fabric.mod.json")
-        def fmj = """{ "schemaVersion": 1, "id": "com_squareup_okio_okio", "version": "3.2.0+manualpatched", "name": "okio", "custom": { "fabric-loom:generated": true}}"""
-        java.nio.file.Files.writeString(fmjPath, fmj, java.nio.charset.StandardCharsets.UTF_8)
-    }
-    println "done patching"
+    include implementation("com.squareup.okhttp3:okhttp:4.9.3")
+    include implementation("com.squareup.okio:okio:3.2.0")
 }
 
 processResources {
@@ -76,7 +24,6 @@ processResources {
     filesMatching("fabric.mod.json") {
         expand "version": project.version
     }
-    exclude ".gitkeep"
 }
 
 // configure the maven publication
