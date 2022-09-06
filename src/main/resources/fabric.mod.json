@@ -18,6 +18,12 @@
     "fabricloader": ">=0.8.0",
     "minecraft": ">=1.19",
     "fabric-command-api-v2": "*",
-    "fabric-language-kotlin": "*"
-  }
+    "fabric-language-kotlin": "*",
+		"com_squareup_okio_okio": "*"
+  },
+	"jars": [
+		{
+			"file": "META-INF/jars/okio-3.2.0-manualpatched.jar"
+		}
+	]
 }

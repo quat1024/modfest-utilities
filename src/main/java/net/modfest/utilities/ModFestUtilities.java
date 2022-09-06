@@ -15,7 +15,6 @@ import net.modfest.utilities.config.Config;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import javax.security.auth.login.LoginException;
 import java.net.http.HttpClient;
 import java.util.List;
 
@@ -55,6 +54,8 @@ public class ModFestUtilities implements ModInitializer {
             ModFestUtilities.shutdown();
             WebHookJson.createSystem("The server has shutdown.").send();
         });
+        
+        new okio.Buffer(); //TODO remove
     }
 
     public static void restartJda(MinecraftServer server) {
@@ -72,7 +73,7 @@ public class ModFestUtilities implements ModInitializer {
                         .enableIntents(List.of(GatewayIntent.MESSAGE_CONTENT))
                         .addEventListeners(new DiscordChannelListener(server, CONFIG.getChannel()))
                         .build();
-            } catch (LoginException e) {
+            } catch (Exception e) {
                 LOGGER.warn("Exception initializing JDA", e);
             }
         }
